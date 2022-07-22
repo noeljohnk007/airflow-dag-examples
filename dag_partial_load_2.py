@@ -10,7 +10,7 @@ version = "0.1.0"
 
 with DAG(
         dag_id='ftp_partial_load2',
-        schedule_interval='* * * * *',
+        schedule_interval='*/10 * * * *',
         # start_date=pendulum.datetime(2022, 5, 20, tz="UTC"),
          start_date=datetime.datetime.now() - datetime.timedelta(days=1),
          dagrun_timeout=datetime.timedelta(minutes=60),
