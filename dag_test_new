@@ -1,0 +1,46 @@
+import datetime
+from airflow import DAG
+from airflow.operators.dummy import DummyOperator
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
+
+version = "0.1.0"
+
+default_args = {
+    '-t': 'jsontopic',
+    '-s': 'full_load',
+    '-l': 'Warn',
+    '-b': 'localhost',
+    '-a': 'aes256'
+}
+with DAG(
+        dag_id='dag_test_new',
+        schedule_interval=None,
+        start_date=datetime.datetime.now() - datetime.timedelta(days=1),
+        dagrun_timeout=datetime.timedelta(minutes=60),
+		default_args=default_args
+        
+) as dag:
+    start = DummyOperator(
+        task_id='start',
+    )
+
+    end = DummyOperator(
+        task_id='end',
+    )
+    
+    dag_test_new = KubernetesPodOperator(
+        namespace='service-monitoring',
+        name="dag_test_new",
+        image="priyesh2020/dagtest2:latest",
+        #arguments=[f'-t={topic}',f'-s={load_type}',f'-l={log_type}',f'-b={broker}',f'-a={encryption_algorithm}'],
+        task_id="dag_test_new",
+        get_logs=True,
+        image_pull_policy='Always',
+        # List of Volume objects to pass to the Pod.
+        #volumes=[volume],
+        # List of VolumeMount objects to pass to the Pod.
+        #volume_mounts=[volume_mount],
+        dag=dag
+    )
+
+start >> dag_test_new >> end
